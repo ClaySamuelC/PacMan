@@ -34,16 +34,22 @@ public:
 	olc::vd2d vMoveDiff;
 
 	uint32_t score = 0;
+	uint32_t pellets = 242;
 
 public:
 	void drawScore()
 	{
-		DrawString(10, nTileWidth * 31, std::to_string(score), olc::WHITE, 2);
+		std::stringstream scoreMessage, pelletMessage;
+		scoreMessage << "Score: " << score;
+		pelletMessage << "Pellets: " << pellets;
+		DrawString(10, nTileWidth * 31, scoreMessage.str(), olc::WHITE, 2);
+		DrawString(10, nTileWidth * 31 + 16, pelletMessage.str(), olc::WHITE, 2);
 	}
 
 	void drawPac()
 	{
-		FillCircle(olc::vi2d(uint32_t(vPacLoc.x * nTileWidth + nTileWidth / 2), uint32_t(vPacLoc.y * nTileWidth + nTileWidth / 2)), nPacRadius, pacColor);
+		FillCircle(olc::vi2d(uint32_t(vPacLoc.x * nTileWidth + nTileWidth / 2),
+			uint32_t(vPacLoc.y * nTileWidth + nTileWidth / 2)), nPacRadius, pacColor);
 	}
 
 	void drawRoom()
@@ -167,6 +173,7 @@ public:
 		{
 			vRoom[collisionY][collisionX] = ' ';
 			score += 100;
+			pellets--;
 		}
 
 		// input logic
