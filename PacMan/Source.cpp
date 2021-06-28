@@ -33,7 +33,14 @@ public:
 	olc::vd2d vNextTurn;
 	olc::vd2d vMoveDiff;
 
+	uint32_t score = 0;
+
 public:
+	void drawScore()
+	{
+		DrawString(10, nTileWidth * 31, std::to_string(score), olc::WHITE, 2);
+	}
+
 	void drawPac()
 	{
 		FillCircle(olc::vi2d(uint32_t(vPacLoc.x * nTileWidth + nTileWidth / 2), uint32_t(vPacLoc.y * nTileWidth + nTileWidth / 2)), nPacRadius, pacColor);
@@ -134,6 +141,7 @@ public:
 		Clear(olc::BLACK);
 		drawRoom();
 		drawPac();
+		drawScore();
 
 		// movement
 		olc::vd2d vPacMov = vPacDir * (fVelocity * double(fElapsedTime));
@@ -143,7 +151,7 @@ public:
 		vPacLoc += vPacMov;
 
 		// check collisions
-		if		(vPacDir.x < 0 && vRoom[int(vPacLoc.y)][vPacLoc.x] == '/')
+		if (vPacDir.x < 0 && vRoom[int(vPacLoc.y)][vPacLoc.x] == '/')
 			vPacLoc.x = std::ceil(vPacLoc.x);
 		else if (vPacDir.y < 0 && vRoom[int(vPacLoc.y)][vPacLoc.x] == '/')
 			vPacLoc.y = std::ceil(vPacLoc.y);
@@ -151,6 +159,15 @@ public:
 			vPacLoc.x = std::floor(vPacLoc.x);
 		else if (vPacDir.y > 0 && vRoom[int(std::ceil(vPacLoc.y))][vPacLoc.x] == '/')
 			vPacLoc.y = std::floor(vPacLoc.y);
+
+		// dot collision
+		int collisionY = vPacLoc.y + 0.5;
+		int collisionX = vPacLoc.x + 0.5;
+		if (vRoom[collisionY][collisionX] == '.')
+		{
+			vRoom[collisionY][collisionX] = ' ';
+			score += 100;
+		}
 
 		// input logic
 		if (GetKey(olc::Key::A).bHeld)
@@ -180,25 +197,24 @@ public:
 			else if (vPacDir.x > 0) vPacLoc.x = std::floor(vPacLoc.x);
 			else if (vPacDir.y > 0) vPacLoc.y = std::floor(vPacLoc.y);
 
-			int nPacX = vPacLoc.x;
 			int nPacY = vPacLoc.y;
 			
-			if ((vPacDir.x < 0															// going left
-				&& (vNextTurn.y < 0 && vRoom[nPacY - 1][std::ceil(vPacLoc.x)] != '/'	// turning down
-				||  vNextTurn.y > 0 && vRoom[nPacY + 1][std::ceil(vPacLoc.x)] != '/'))	// turning up
-			|| (vPacDir.y < 0															// going up
-				&& (vNextTurn.x < 0 && vRoom[nPacY][std::ceil(vPacLoc.x - 1)] != '/'	// turning left
-				||  vNextTurn.x > 0 && vRoom[nPacY][std::ceil(vPacLoc.x + 1)] != '/'))	// turning right
-			|| (vPacDir.x > 0															// going right
-				&& (vNextTurn.y < 0 && vRoom[nPacY - 1][vPacLoc.x] != '/'				// turning down
-				||  vNextTurn.y > 0 && vRoom[nPacY + 1][vPacLoc.x] != '/'))				// turning up
-			|| (vPacDir.y > 0															// going down
-				&& (vNextTurn.x < 0 && vRoom[nPacY][vPacLoc.x - 1] != '/'				// turning left
-				||  vNextTurn.x > 0 && vRoom[nPacY][vPacLoc.x + 1] != '/')))			// turning right
+			if ((vPacDir.x < 0																// going left
+				&& (vNextTurn.y < 0 && vRoom[nPacY - 1][vPacLoc.x] != '/'					// turning down
+				||  vNextTurn.y > 0 && vRoom[nPacY + 1][vPacLoc.x] != '/'))					// turning up
+			|| (vPacDir.y < 0																// going up
+				&& (vNextTurn.x < 0 && vRoom[nPacY][vPacLoc.x - 1] != '/'					// turning left
+				||  vNextTurn.x > 0 && vRoom[nPacY][vPacLoc.x + 1] != '/'))					// turning right
+			|| (vPacDir.x > 0																// going right
+				&& (vNextTurn.y < 0 && vRoom[nPacY - 1][vPacLoc.x] != '/'					// turning down
+				||  vNextTurn.y > 0 && vRoom[nPacY + 1][vPacLoc.x] != '/'))					// turning up
+			|| (vPacDir.y > 0																// going down
+				&& (vNextTurn.x < 0 && vRoom[nPacY][vPacLoc.x - 1] != '/'					// turning left
+				||  vNextTurn.x > 0 && vRoom[nPacY][vPacLoc.x + 1] != '/')))				// turning right
 			{
-				vPacLoc += vNextTurn * fMoveDiff;
 				vPacDir = vNextTurn;
 			}
+			vPacLoc += vPacDir * fMoveDiff;
 		}
 		
 		return true;
@@ -208,7 +224,7 @@ public:
 int main()
 {
 	PacMan demo;
-	if (demo.Construct(392, 434, 2, 2))
+	if (demo.Construct(392, 470, 1, 1))
 		demo.Start();
 
 	return 0;
